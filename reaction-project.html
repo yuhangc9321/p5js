@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+    <title>p5js Template</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.3/p5.js"></script>
+
+    <script>
+        var millisecond;
+        var delay;
+        var startTime;
+        var reactTime;
+        var gameState;
+
+        function setup() {
+
+            gameState = 0 // 0 means anything before the GO screen 
+            delay = random(4000, 8000);
+            createCanvas(800, 600);
+
+            // creation of home screen 
+
+            background(0);
+            fill(255);
+            textSize(50);
+            text("PRESS SPACE TO START", 70, 150); 
+            text("player one: key A", 70, 250);
+            text("player two: key L", 70, 350);
+        }
+
+        function draw() {
+           
+            // make it so you cannot hit a key after someone has won or hit it too early
+
+            millisecond = millis();
+
+            // to make the GO screen appear after a unknow amount of time
+
+            if (reactTime < millisecond && gameState != 2) { // gameState != 2 It is not after the GO screen 
+                gameState = 1; // when screen is on the Go screen 
+                background(158, 206, 8);
+                text("GO!", 300, 300);
+
+                // if A is pressed first then show player one wins
+
+                if (key == "A") {
+                    background(255, 165, 0);
+                    text("player one wins!", 45, 300);
+                    gameState = 2;
+                }
+                // if L is pressed first then show player two wins 
+
+                else if (key == "L") {
+                    background(70, 130, 180);
+                    text("player two wins!", 45, 300);
+                    gameState = 2;
+                }
+
+            }
+            // L is pressed before Go is shown 
+
+            if (key == "L" && gameState == 0) {
+                background(159, 69, 118);
+                text("player two jumped the gun!", 45, 300);
+                gameState = 2;
+            }
+            // A is pressed befor the GO is shown 
+
+            if (key == "A" && gameState == 0) {
+                background(159, 69, 118);
+                text("player one jumped the gun!", 45, 300);
+                gameState = 2;
+            }
+
+        }
+
+        function keyPressed() {
+            // to show WAIT when the spacebar is pressed
+            if (keyCode == 32) {
+                gameState = 0;
+                background(237, 28, 36);
+                text("WAIT.", 260, 300);
+                startTime = millis();
+                reactTime = delay + startTime;
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div id="code" class="container-fluid">
+        <script src="https://gist-it.appspot.com/github/yuhangc9321/p5js/blob/gh-pages/reaction-project.html?footer=0"></script>
+    </div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script>
+        $(window).bind("load", function() {
+            $('#code').before($('#defaultCanvas0').remove());
+        });
+    </script>
+</body>
+
+
+</html>
