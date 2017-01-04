@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+    <title>Pong</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.13/p5.js"></script>
+    <script>
+        var ballX;
+        var ballY;
+        var ballSpeedX;
+        var ballSpeedY;
+        var paddleHeight;
+        var paddleWidth;
+        var gameRunning = 0; // 0 means game is not running (has not started yet or is paused) and 1 means game is running
+        var leftScore = 0; // player one's score
+        var rightScore = 0; // player two's score
+        var leftPaddleY = 300; // y position of player one's paddle
+        var rightPaddleY = 300; // y position of player two's paddle
+
+        function setup() {
+            createCanvas(800, 600);
+            noCursor();
+            
+            // initiates variables
+            ballX = 400;
+            ballY = random(200, height - 200); // the ball's starting vertical postion is chosen randomly
+            ballSpeedX = random(-6, 6); // the ball's starting horizontal speed is chosen randomly
+            ballSpeedY = random(-6, 6); // the ball's starting vertical speed is chosen randomly
+            paddleHeight = 150;
+            paddleWidth = 30;
+            gameRunning = 0; // the game starts off as paused / not running
+        }
+
+        function draw() {
+            background(0); // sets the background to black
+            
+            // creates the paddle and the ball
+            drawPaddle();
+            drawBall();
+            
+            // detects a mouse click and toggles between pause and unpaused
+            if (mouseIsPressed == 1) { //checks if mouse has been clicked 
+                if (gameRunning == 0) { // checks if the game is not already running
+                    gameRunning = 1; // run the game
+                }
+                else {
+                    gameRunning = 0; // pause the game
+                }
+            }
+            
+            // creates the dotted line down the middle of the canvas
+            for (y = 0; y < 610; y += 40) {
+                rect(400, y, 10, 30);
+            }
+            
+            // displays the scores of player one and player two
+            textSize(100);
+            fill(255);
+            text(leftScore, 260, 150); // player one score
+            text(rightScore, width - 300, 150); // player two score
+
+            if (gameRunning == 1) {
+                if (keyIsPressed == 1) {
+                    if (key == "W" || key == "w") {
+                        leftPaddleY -= 7;
+                    }
+                    else if (key == "S" || key == "s") {
+                        leftPaddleY += 7;
+                    }
+                    if (keyCode == 38) {
+                        rightPaddleY -= 7;
+                    }
+                    else if (keyCode == 40) {
+                        rightPaddleY += 7;
+                    }
+                }
+                
+                moveBall(); // moves the ball across the screen
+                checkCollide(); // checks if the ball has hit the walls or paddles
+                
+            }
+        }
+
+        function moveBall() {
+            ballX = ballX + ballSpeedX; // moves the ball horizontally
+            ballY = ballY + ballSpeedY; // moves the ball vertically
+        }
+
+        function checkCollide() {
+            if (ballY < 0 || ballY > height) { // if the ball hits the top or bottom edges
+                ballSpeedY = ballSpeedY * -1; // then bounce by reversing the vertical speed of the ball
+            }
+            if (ballX < paddleWidth) { // checks if the ball is past the left goal line
+                if (ballY > leftPaddleY - paddleHeight / 2 && ballY < leftPaddleY + paddleHeight / 2) { // checks if the ball is within the top and bottom edges of the left paddle
+                    ballSpeedX = ballSpeedX * -1; // makes the ball bounce by reversing the horizontal speed of the ball
+                }
+                else {
+                    rightScore++; // increase player two's score by one
+                    setup(); // reset the ball to it's original position
+                }
+            }
+            if (ballX > width - paddleWidth) { // checks if the ball is past the right goal line
+                if (ballY > rightPaddleY - paddleHeight / 2 && ballY < rightPaddleY + paddleHeight / 2) { // checks if the ball is within the top and bottom edges of the right paddle
+                    ballSpeedX = ballSpeedX * -1; // makes the ball bounce by reversing the horizontal speed of the ball
+                }
+                else {
+                    leftScore++; // increase player one's score by one
+                    setup() // reset the ball to it's original position
+                }
+            }
+        }
+
+        function drawBall() {
+            noStroke();
+            ellipse(ballX, ballY, 20, 20); // creates the ball on the canvas
+        }
+
+        function drawPaddle() {
+            noStroke();
+            rectMode(CENTER);
+            rect(paddleWidth / 2, leftPaddleY, paddleWidth, paddleHeight); // the left paddle's x value is always to the left but shifted right the width of the paddle
+            rect(width - paddleWidth / 2, rightPaddleY, paddleWidth, paddleHeight); // the right paddles's  x value is always to the right but shifted left the width of the paddle
+        }
+    </script>
+</head>
+
+<body>
+    <form><input TYPE="button" onClick="history.go(0)" value="Reset"></form>
+    <div id="code" class="container-fluid">
+        <script src="https://gist-it.appspot.com/github/USERNAME/p5js/blob/gh-pages/FILENAME.html?footer=0"></script>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script>
+        $(window).bind("load", function() {
+            $('#code').before($('#defaultCanvas').remove());
+        });
+    </script>
+</body>
+
+
+</html>
