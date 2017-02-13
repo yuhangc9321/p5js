@@ -1,0 +1,229 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+    <title>p5js Template</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.3/p5.js"></script>
+
+    <script>
+        // the center points of each players' character
+        var player1X = 100;
+        var player1Y = 100;
+        var player2X = 700;
+        var player2Y = 500;
+
+        // determines which of the 8 cardinal directions each player will face
+        player1DirectState = 4;
+        player2DirectState = 8;
+
+        // determines the final value for where the end the barrel should point
+        var player1BarrelX = player1X - 50;
+        var player1BarrelY = player1Y;
+        var player2BarrelX = player2X + 50;
+        var player2BarrelY = player2Y;
+
+        // array for holding velocity during movement
+        var velocities = [0, -50, 50, -50, 50, 0, 50, 50, 0, 50, -50, 50, -50, 0, -50, -50];
+
+        // array for holding the exact locations the barrel should point to
+        var turnPoints = [0, -50, 38, -38, 50, 0, 38, 38, 0, 50, -38, 38, -50, 0, -38, -38]
+
+        // holds the amount to move each player
+        var xVelocity;
+        var yVelocity;
+
+        // holds the value for where the barrel should point relative to the players' current location
+        var xTurnPoint;
+        var yTurnPoint;
+
+        // array for holding pellets (bullets)
+        var pellets = [];
+
+        function setup() {
+            createCanvas(800, 600);
+        }
+
+        function draw() {
+            background(0);
+
+            // creates the green grid
+            strokeWeight(2);
+            stroke(35, 85, 35);
+            for (var i = 1; i < width / 50; i++) {
+                line(i * 50, 0, i * 50, height);
+            }
+            for (var i = 1; i < height / 50; i++) {
+                line(0, i * 50, width, i * 50);
+            }
+
+            // moves and displays each pellet
+            for (var i = 0; i < pellets.length; i++) {
+                pellets[i].move();
+                pellets[i].display();
+            }
+
+            // keeps players inside canvas
+            player1X = constrain(player1X, 0, 800);
+            player1Y = constrain(player1Y, 0, 600);
+            player2X = constrain(player2X, 0, 800);
+            player2Y = constrain(player2Y, 0, 600);
+
+            barrelLocation();
+            displayCharacters();
+        }
+
+        function keyPressed() {
+            // changes the direction player 1 faces
+            if (key == "A" || key == "a") {
+                player1DirectState -= 1; // turn left
+                if (player1DirectState < 1) {
+                    player1DirectState = 8;
+                }
+            }
+            else if (key == "D" || key == "d") {
+                player1DirectState += 1; // turn right
+                if (player1DirectState > 8) {
+                    player1DirectState = 1;
+                }
+            }
+
+            // changes the direction player 2 faces
+            if (keyCode == 37) {
+                player2DirectState -= 1; // turn left
+                if (player2DirectState < 1) {
+                    player2DirectState = 8;
+                }
+            }
+            else if (keyCode == 39) {
+                player2DirectState += 1; // turn right
+                if (player2DirectState > 8) {
+                    player2DirectState = 1;
+                }
+            }
+
+            // moves player 1 forward torwards their current direction
+            if (key == "W" || key == "w") {
+                for (var i = 0; i < 8; i++) {
+                    if (player1DirectState == i + 1) {
+                        xVelocity = velocities[i * 2];
+                        yVelocity = velocities[(i * 2) + 1];
+                        player1X += xVelocity;
+                        player1Y += yVelocity;
+                        if (player1X == player2X && player1Y == player2Y) {
+                            player1X -= xVelocity;
+                            player1Y -= yVelocity;
+                        }
+                    }
+                }
+            }
+
+            // moves player 2 forward torwards their current direction
+            if (keyCode == "38") {
+                for (var i = 0; i < 8; i++) {
+                    if (player2DirectState == i + 1) {
+                        xVelocity = velocities[i * 2];
+                        yVelocity = velocities[(i * 2) + 1];
+                        player2X += xVelocity;
+                        player2Y += yVelocity;
+                        if (player2X == player1X && player2Y == player1Y) {
+                            player2X -= xVelocity;
+                            player2Y -= yVelocity;
+                        }
+                    }
+                }
+            }
+
+            // shoots a projectile for player 1
+            if (keyCode == "32") {
+                pellets.push(new Pellet(player1DirectState, player1BarrelX, player1BarrelY)); // adds a new pellet to the end of the pellets array
+            }
+            
+            // shoots a projectile for player 2
+            if (keyCode == "16") {
+                pellets.push(new Pellet(player2DirectState, player2BarrelX, player2BarrelY)); // adds a new pellet to the end of the pellets array
+            }
+        }
+
+        // changes where each players' barrel points to based on the direction
+        function barrelLocation() {
+            // player 1 barrel location
+            for (var i = 0; i < 8; i++) {
+                if (player1DirectState == i + 1) {
+                    xTurnPoint = turnPoints[i * 2];
+                    yTurnPoint = turnPoints[(i * 2) + 1];
+                    player1BarrelX = player1X + xTurnPoint;
+                    player1BarrelY = player1Y + yTurnPoint;
+                }
+            }
+
+            // player 2 barrel loation
+            for (var i = 0; i < 8; i++) {
+                if (player2DirectState == i + 1) {
+                    xTurnPoint = turnPoints[i * 2];
+                    yTurnPoint = turnPoints[(i * 2) + 1];
+                    player2BarrelX = player2X + xTurnPoint;
+                    player2BarrelY = player2Y + yTurnPoint;
+                }
+            }
+        }
+
+        // displays the characters for each player
+        function displayCharacters() {
+            strokeWeight(11);
+
+            // player 1 character 
+            stroke(71, 147, 255);
+            fill(71, 147, 255);
+            ellipse(player1X, player1Y, 40, 40);
+            line(player1X, player1Y, player1BarrelX, player1BarrelY);
+
+
+            // player 2 character
+            stroke(255, 179, 71);
+            fill(255, 179, 71);
+            ellipse(player2X, player2Y, 40, 40);
+            line(player2X, player2Y, player2BarrelX, player2BarrelY);
+        }
+        
+        // instructions for creating a pellet
+        function Pellet(whoDirectState, playerWhoBarrelX, playerWhoBarrelY) {
+            this.x = playerWhoBarrelX;
+            this.y = playerWhoBarrelY;
+
+            this.move = function() {
+                for (var i = 0; i < 8; i++) {
+                    if (whoDirectState == i + 1) {
+                        xVelocity = velocities[i * 2];
+                        yVelocity = velocities[(i * 2) + 1];
+                        this.xVelocity = xVelocity;
+                        this.yVelocity = yVelocity;
+                    }
+                }
+                this.x += xVelocity / 25;
+                this.y += yVelocity / 25;
+            }
+
+            this.display = function() {
+                stroke(255);
+                fill(255);
+                ellipse(this.x, this.y, 10, 10);
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div id="code" class="container-fluid">
+        <script src="https://gist-it.appspot.com/github/yuhangc9321/p5js/blob/gh-pages/objects-project.html?footer=0"></script>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script>
+        $(window).bind("load", function() {
+            $('#code').before($('#defaultCanvas').remove());
+        });
+    </script>
+</body>
+
+
+</html>
